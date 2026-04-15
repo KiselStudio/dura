@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dura AI — Чат</title>
+    <meta name="description" content="AI ассистент — чат с нейросетями">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="chat-page">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+                    <defs>
+                        <linearGradient id="sLogo" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#a78bfa" />
+                            <stop offset="100%" style="stop-color:#6366f1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="40" height="40" rx="12" fill="url(#sLogo)" />
+                    <path
+                        d="M12 20C12 15.6 15.6 12 20 12C24.4 12 28 15.6 28 20M16 20C16 17.8 17.8 16 20 16C22.2 16 24 17.8 24 20M20 20V28M16 26H24"
+                        stroke="white" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <span>Dura AI</span>
+            </div>
+            <button class="btn-icon sidebar-close" id="sidebar-close" title="Закрыть">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+
+        <button class="btn btn-new-chat" id="new-chat-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Новый чат
+        </button>
+
+        <div class="chat-list" id="chat-list">
+            <!-- Chats loaded dynamically -->
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-info" id="user-info">
+                <div class="user-avatar" id="user-avatar">U</div>
+                <div class="user-details">
+                    <div class="user-name" id="user-name">Загрузка...</div>
+                    <div class="user-plan" id="user-plan">—</div>
+                </div>
+            </div>
+            <div class="sidebar-actions">
+                <button class="btn-icon" id="settings-btn" title="Настройки">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                </button>
+                <button class="btn-icon" id="logout-btn" title="Выйти">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="chat-main" id="chat-main">
+        <!-- Top Bar -->
+        <header class="chat-header">
+            <button class="btn-icon sidebar-toggle" id="sidebar-toggle">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <div class="chat-title" id="chat-title">Выберите или создайте чат</div>
+            <div class="chat-header-actions">
+                <div class="limits-badge" id="limits-badge" title="Лимиты">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </svg>
+                    <span id="limits-text">—</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Messages Area -->
+        <div class="messages-container" id="messages-container">
+            <div class="messages-list" id="messages-list">
+                <!-- Welcome screen -->
+                <div class="welcome-screen" id="welcome-screen">
+                    <div class="welcome-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" opacity="0.5">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </div>
+                    <h2>Добро пожаловать в Dura AI</h2>
+                    <p>Создайте новый чат или выберите существующий, чтобы начать разговор с ИИ.</p>
+                    <div class="welcome-actions">
+                        <button class="btn btn-primary" id="welcome-new-chat">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                            Новый чат
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area" id="input-area" style="display:none">
+            <div class="image-preview" id="image-preview" style="display:none">
+                <img id="preview-img" src="" alt="Preview">
+                <button class="btn-icon preview-remove" id="preview-remove">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="input-row">
+                <button class="btn-icon input-action" id="upload-btn" title="Загрузить фото">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                </button>
+                <button class="btn-icon input-action btn-generate-image" id="generate-image-btn"
+                    title="Сгенерировать изображение">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L9 9H2l6 4-2 7 6-4 6 4-2-7 6-4h-7z" />
+                    </svg>
+                </button>
+                <div class="input-field-wrapper">
+                    <textarea id="message-input" placeholder="Напишите сообщение..." rows="1"></textarea>
+                </div>
+                <button class="btn-icon btn-send" id="send-btn" title="Отправить" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                </button>
+            </div>
+            <input type="file" id="file-input" accept="image/*" style="display:none">
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal" style="display:none">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Настройки</h2>
+                <button class="btn-icon modal-close" id="settings-close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Text Model -->
+                <div class="settings-section">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                        Текстовая модель
+                    </h3>
+                    <div class="model-select-list" id="text-model-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Image Model -->
+                <div class="settings-section">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                        Модель изображений
+                    </h3>
+                    <div class="model-select-list" id="image-model-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Limits -->
+                <div class="settings-section">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                        Лимиты
+                    </h3>
+                    <div class="limits-display" id="limits-display">
+                        <div class="limit-bar">
+                            <div class="limit-info">
+                                <span>Текстовые сообщения</span>
+                                <span id="text-limit-numbers">— / —</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="text-progress"></div>
+                            </div>
+                        </div>
+                        <div class="limit-bar">
+                            <div class="limit-info">
+                                <span>Генерация изображений</span>
+                                <span id="image-limit-numbers">— / —</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill progress-fill--image" id="image-progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buy More -->
+                <div class="settings-section">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="9" cy="21" r="1" />
+                            <circle cx="20" cy="21" r="1" />
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                        </svg>
+                        Докупить лимиты
+                    </h3>
+                    <div class="packages-grid" id="packages-grid">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Subscription -->
+                <div class="settings-section">
+                    <h3>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                            <path d="M2 17l10 5 10-5" />
+                            <path d="M2 12l10 5 10-5" />
+                        </svg>
+                        Подписка
+                    </h3>
+                    <div class="subscriptions-grid" id="subscriptions-grid">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Generation Modal -->
+    <div class="modal-overlay" id="image-gen-modal" style="display:none">
+        <div class="modal modal--compact">
+            <div class="modal-header">
+                <h2>Генерация изображения</h2>
+                <button class="btn-icon modal-close" id="image-gen-close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="image-prompt">Описание изображения</label>
+                    <textarea id="image-prompt" placeholder="Опишите изображение, которое хотите создать..."
+                        rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="image-size">Размер</label>
+                        <select id="image-size">
+                            <option value="1024x1024">1024×1024</option>
+                            <option value="1536x1024">1536×1024</option>
+                            <option value="1024x1536">1024×1536</option>
+                            <option value="512x512">512×512</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="image-quality">Качество</label>
+                        <select id="image-quality">
+                            <option value="high">Высокое</option>
+                            <option value="medium">Среднее</option>
+                            <option value="low">Низкое</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="image-gen-error" class="form-error" style="display:none"></div>
+                <div id="image-gen-result" style="display:none">
+                    <img id="generated-image" src="" alt="Generated" class="generated-image">
+                </div>
+                <button class="btn btn-primary btn-full" id="generate-btn">
+                    <span>Сгенерировать</span>
+                    <div class="btn-loader" style="display:none"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Status Modal -->
+    <div class="modal-overlay" id="payment-modal" style="display:none">
+        <div class="modal modal--compact">
+            <div class="modal-header">
+                <h2>Оплата</h2>
+                <button class="btn-icon modal-close" id="payment-close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body payment-status-body">
+                <div class="payment-spinner" id="payment-spinner">
+                    <div class="spinner-ring"></div>
+                    <p>Ожидание оплаты...</p>
+                    <p class="payment-hint">После оплаты статус обновится автоматически</p>
+                </div>
+                <div class="payment-success" id="payment-success" style="display:none">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    <p>Оплата прошла успешно!</p>
+                    <p class="payment-hint">Лимиты обновлены</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/settings.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
