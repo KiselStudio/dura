@@ -6,6 +6,13 @@
     <title>Polza AI Chat - Material You</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries for Formulas and Markdown -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
         :root {
             --m3-bg: #fdfbff;
@@ -215,6 +222,64 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+        /* Message Image */
+        .msg-img {
+            max-width: 100%;
+            border-radius: var(--radius-l);
+            margin-bottom: 8px;
+            display: block;
+            cursor: pointer;
+        }
+
+        /* Preview Area */
+        #preview-container {
+            display: none;
+            padding: 8px 16px;
+            background: var(--m3-surface);
+            border-top-left-radius: var(--radius-l);
+            border-top-right-radius: var(--radius-l);
+            position: relative;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .img-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--m3-outline);
+        }
+
+        .remove-preview {
+            position: absolute;
+            top: 4px;
+            left: 70px;
+            background: var(--m3-surface-variant);
+            color: var(--m3-on-surface);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Markdown Styles */
+        .msg-bubble p { margin-bottom: 8px; }
+        .msg-bubble p:last-child { margin-bottom: 0; }
+        .msg-bubble pre {
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+        .msg-bubble code { font-family: monospace; background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 4px; }
+
         /* Tablet/Desktop tweaks */
         @media (min-width: 600px) {
             header { padding: 16px 24px; }
@@ -243,7 +308,15 @@
             <!-- Messages will appear here -->
         </div>
         <div class="bottom-bar">
+            <div id="preview-container">
+                <img id="img-preview" class="img-preview">
+                <button class="remove-preview" onclick="removeImage()">×</button>
+            </div>
             <div class="input-holder">
+                <button class="icon-btn" onclick="document.getElementById('photo-input').click()">
+                    <i class="fa-solid fa-paperclip"></i>
+                </button>
+                <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="handleImageSelect(event)">
                 <input type="text" id="chat-input" placeholder="Сообщение..." autocomplete="off">
                 <div class="loader" id="chat-loader"></div>
                 <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-arrow-up"></i></button>
@@ -260,9 +333,6 @@
             CHAT_MODELS: [
                 { id: 'z-ai/glm-5.1', name: 'Z.ai: GLM 5.1' },
                 { id: 'yandex/yandexgpt-5-lite', name: 'YandexGPT Lite 5' },
-                { id: 'yandex/yandexgpt-5.1-pro', name: 'YandexGPT Pro 5.1' },
-                { id: 'yandex/yandexgpt-5-pro', name: 'YandexGPT Pro 5' },
-                { id: 'yandex/aliceai-llm', name: 'Alice AI LLM' },
                 { id: 'arcee-ai/trinity-large-thinking', name: 'Arcee AI: Trinity Large Thinking' },
                 { id: 'kwaipilot/kat-coder-pro-v2', name: 'Kwaipilot: KAT-Coder-Pro V2' },
                 { id: 'xiaomi/mimo-v2-pro', name: 'Xiaomi: MiMo-V2-Pro' },
@@ -428,12 +498,13 @@
         };
 
         let chatHistory = JSON.parse(localStorage.getItem('elka_chat_history') || '[]');
+        let selectedImage = null;
 
         window.onload = () => {
             initModelSelector();
             renderChat();
             if (chatHistory.length === 0) {
-                addMessage('assistant', 'Привет! Я твой AI-ассистент. Оптимизирован под мобильные устройства. О чем хочешь поговорить?', false);
+                addMessage('assistant', 'Привет! Я твой AI-ассистент. Оптимизирован под мобильные устройства. О чем хочешь поговорить?', null, false);
             }
             updateThemeIcon();
         };
@@ -454,19 +525,56 @@
             document.getElementById('theme-icon').innerHTML = `<i class="fa-solid fa-${isDark ? 'moon' : 'sun'}"></i>`;
         }
 
+        // --- IMAGE HANDLING ---
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                selectedImage = event.target.result;
+                document.getElementById('img-preview').src = selectedImage;
+                document.getElementById('preview-container').style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            selectedImage = null;
+            document.getElementById('photo-input').value = '';
+            document.getElementById('preview-container').style.display = 'none';
+        }
+
         // --- CHAT LOGIC ---
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             const model = document.getElementById('model-select').value;
             
-            if (!text) return;
+            if (!text && !selectedImage) return;
 
-            addMessage('user', text);
+            const currentImage = selectedImage;
+            addMessage('user', text, currentImage);
+            
             input.value = '';
+            removeImage();
             document.getElementById('chat-loader').style.display = 'block';
 
             try {
+                // Construct messages for API
+                const apiMessages = chatHistory.map(m => {
+                    if (m.image) {
+                        return {
+                            role: m.role,
+                            content: [
+                                { type: 'text', text: m.text || '' },
+                                { type: 'image_url', image_url: { url: m.image } }
+                            ]
+                        };
+                    }
+                    return { role: m.role, content: m.text };
+                });
+
                 const response = await fetch(`${CONFIG.BASE_URL}/chat/completions`, {
                     method: 'POST',
                     headers: {
@@ -475,7 +583,7 @@
                     },
                     body: JSON.stringify({
                         model: model,
-                        messages: chatHistory.map(m => ({ role: m.role, content: m.text })).concat([{ role: 'user', content: text }])
+                        messages: apiMessages
                     })
                 });
 
@@ -491,10 +599,12 @@
             }
         }
 
-        function addMessage(role, text, save = true) {
+        function addMessage(role, text, image = null, save = true) {
             if (save) {
-                chatHistory.push({ role, text });
+                chatHistory.push({ role, text, image });
                 localStorage.setItem('elka_chat_history', JSON.stringify(chatHistory));
+            } else if (chatHistory.length === 0) {
+                 chatHistory.push({ role, text, image });
             }
             renderChat();
         }
@@ -502,11 +612,33 @@
         function renderChat() {
             const scroller = document.getElementById('chat-scroller');
             scroller.innerHTML = '';
+            
             chatHistory.forEach(msg => {
                 const div = document.createElement('div');
                 div.className = `msg-bubble ${msg.role === 'user' ? 'msg-user' : 'msg-ai'}`;
-                div.innerText = msg.text;
+                
+                let html = '';
+                if (msg.image) {
+                    html += `<img src="${msg.image}" class="msg-img" onclick="window.open('${msg.image}')">`;
+                }
+                
+                if (msg.text) {
+                    html += marked.parse(msg.text);
+                }
+                
+                div.innerHTML = html;
                 scroller.appendChild(div);
+                
+                // Render Math
+                renderMathInElement(div, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError : false
+                });
             });
             scroller.scrollTop = scroller.scrollHeight;
         }
