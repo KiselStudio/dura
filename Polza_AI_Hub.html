@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Polza AI Chat - Material You</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --m3-bg: #fdfbff;
+            --m3-surface: #f3f3f8;
+            --m3-surface-variant: #e1e2ec;
+            --m3-primary: #005ac1;
+            --m3-on-primary: #ffffff;
+            --m3-primary-container: #d8e2ff;
+            --m3-on-primary-container: #001a41;
+            --m3-secondary: #575e71;
+            --m3-outline: #747781;
+            --m3-on-surface: #1b1b1f;
+            --m3-on-surface-variant: #44474f;
+            --radius-xl: 28px;
+            --radius-l: 16px;
+        }
+
+        [data-theme="dark"] {
+            --m3-bg: #1b1b1f;
+            --m3-surface: #232326;
+            --m3-surface-variant: #44474f;
+            --m3-primary: #adc6ff;
+            --m3-on-primary: #002e69;
+            --m3-primary-container: #004494;
+            --m3-on-primary-container: #d8e2ff;
+            --m3-secondary: #bfc6dc;
+            --m3-outline: #8e9099;
+            --m3-on-surface: #e3e2e6;
+            --m3-on-surface-variant: #c4c6d0;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: var(--m3-bg); 
+            color: var(--m3-on-surface);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        /* Mobile Optimized Header */
+        header {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--m3-surface);
+            border-bottom: 1px solid var(--m3-surface-variant);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .model-selector {
+            background: var(--m3-surface-variant);
+            padding: 6px 12px;
+            border-radius: var(--radius-l);
+            border: none;
+            color: var(--m3-on-surface);
+            font-size: 13px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            max-width: 140px;
+        }
+
+        /* Main Container */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        /* Chat Scroller */
+        #chat-scroller {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .msg-bubble {
+            max-width: 90%;
+            padding: 12px 16px;
+            border-radius: var(--radius-l);
+            line-height: 1.5;
+            font-size: 15px;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background: var(--m3-primary);
+            color: var(--m3-on-primary);
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-ai {
+            align-self: flex-start;
+            background: var(--m3-surface-variant);
+            color: var(--m3-on-surface);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Bottom Input Bar */
+        .bottom-bar {
+            padding: 12px 16px;
+            background: var(--m3-bg);
+            flex-shrink: 0;
+        }
+
+        .input-holder {
+            background: var(--m3-surface-variant);
+            border-radius: var(--radius-xl);
+            padding: 4px 4px 4px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .input-holder input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--m3-on-surface);
+            font-size: 16px;
+            padding: 10px 0;
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            background: var(--m3-primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+            background: var(--m3-primary-container);
+            color: var(--m3-on-primary-container);
+        }
+
+        /* Utils */
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--m3-on-surface-variant);
+            cursor: pointer;
+            font-size: 18px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:active { background: var(--m3-surface-variant); }
+
+        .loader {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--m3-surface);
+            border-top: 2px solid var(--m3-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Tablet/Desktop tweaks */
+        @media (min-width: 600px) {
+            header { padding: 16px 24px; }
+            .msg-bubble { max-width: 80%; }
+            .bottom-bar { padding: 16px 24px; }
+        }
+
+    </style>
+</head>
+<body data-theme="dark">
+
+    <header>
+        <div class="header-title">
+            <i class="fa-solid fa-leaf" style="color: var(--m3-primary);"></i>
+            <span>AI Chat</span>
+        </div>
+        <div class="header-actions">
+            <select id="model-select" class="model-selector"></select>
+            <button class="icon-btn" onclick="toggleTheme()" id="theme-icon"><i class="fa-solid fa-moon"></i></button>
+            <button class="icon-btn" onclick="clearHistory()"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div id="chat-scroller">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="bottom-bar">
+            <div class="input-holder">
+                <input type="text" id="chat-input" placeholder="Сообщение..." autocomplete="off">
+                <div class="loader" id="chat-loader"></div>
+                <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-arrow-up"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- КОНФИГУРАЦИЯ ---
+        const CONFIG = {
+            API_KEY: 'pza_RB93WT_ADTi53AWaV6seXxJndu6rx1AH',
+            BASE_URL: 'https://api.polza.ai/api/v1',
+            
+            CHAT_MODELS: [
+                { id: 'z-ai/glm-5.1', name: 'Z.ai: GLM 5.1' },
+                { id: 'yandex/yandexgpt-5-lite', name: 'YandexGPT Lite 5' },
+                { id: 'yandex/yandexgpt-5.1-pro', name: 'YandexGPT Pro 5.1' },
+                { id: 'yandex/yandexgpt-5-pro', name: 'YandexGPT Pro 5' },
+                { id: 'yandex/aliceai-llm', name: 'Alice AI LLM' },
+                { id: 'arcee-ai/trinity-large-thinking', name: 'Arcee AI: Trinity Large Thinking' },
+                { id: 'kwaipilot/kat-coder-pro-v2', name: 'Kwaipilot: KAT-Coder-Pro V2' },
+                { id: 'xiaomi/mimo-v2-pro', name: 'Xiaomi: MiMo-V2-Pro' },
+                { id: 'minimax/minimax-m2.7', name: 'MiniMax: MiniMax M2.7' },
+                { id: 'z-ai/glm-5-turbo', name: 'Z.ai: GLM 5 Turbo' },
+                { id: 'inception/mercury-2', name: 'Inception: Mercury 2' },
+                { id: 'liquid/lfm-2-24b-a2b', name: 'LiquidAI: LFM2-24B-A2B' },
+                { id: 'aion-labs/aion-2.0', name: 'AionLabs: Aion-2.0' },
+                { id: 'upstage/solar-pro-3', name: 'Upstage: Solar Pro 3' },
+                { id: 'stepfun/step-3.5-flash', name: 'StepFun: Step 3.5 Flash' },
+                { id: 'qwen/qwen3-max-thinking', name: 'Qwen: Qwen3 Max Thinking' },
+                { id: 'minimax/minimax-m2.5', name: 'MiniMax: MiniMax M2.5' },
+                { id: 'z-ai/glm-5', name: 'Z.ai: GLM 5' },
+                { id: 'qwen/qwen3-coder-next', name: 'Qwen: Qwen3 Coder Next' },
+                { id: 'z-ai/glm-4.6', name: 'Z.AI: GLM 4.6' },
+                { id: 'z-ai/glm-4.5-air', name: 'Z.AI: GLM 4.5 Air' },
+                { id: 'z-ai/glm-4.5', name: 'Z.AI: GLM 4.5' },
+                { id: 'z-ai/glm-4-32b', name: 'Z.AI: GLM 4 32B ' },
+                { id: 'xiaomi/mimo-v2-flash', name: 'Xiaomi: MiMo-V2-Flash' },
+                { id: 'x-ai/grok-code-fast-1', name: 'xAI: Grok Code Fast 1' },
+                { id: 'x-ai/grok-3-mini-beta', name: 'xAI: Grok 3 Mini Beta' },
+                { id: 'x-ai/grok-3-mini', name: 'xAI: Grok 3 Mini Beta' },
+                { id: 'x-ai/grok-3-beta', name: 'xAI: Grok 3 Beta' },
+                { id: 'x-ai/grok-3', name: 'xAI: Grok 3 Beta' },
+                { id: 'writer/palmyra-x5', name: 'Writer: Palmyra X5' },
+                { id: 'undi95/remm-slerp-l2-13b', name: 'ReMM SLERP 13B' },
+                { id: 'tngtech/deepseek-r1t2-chimera', name: 'TNG: DeepSeek R1T2 Chimera' },
+                { id: 'thedrummer/unslopnemo-12b', name: 'TheDrummer: UnslopNemo 12B' },
+                { id: 'thedrummer/skyfall-36b-v2', name: 'TheDrummer: Skyfall 36B V2' },
+                { id: 'thedrummer/rocinante-12b', name: 'TheDrummer: Rocinante 12B' },
+                { id: 'thedrummer/cydonia-24b-v4.1', name: 'TheDrummer: Cydonia 24B V4.1' },
+                { id: 'tencent/hunyuan-a13b-instruct', name: 'Tencent: Hunyuan A13B Instruct' },
+                { id: 'switchpoint/router', name: 'Switchpoint Router' },
+                { id: 'sao10k/l3.3-euryale-70b', name: 'Sao10K: Llama 3.3 Euryale 70B' },
+                { id: 'sao10k/l3.1-euryale-70b', name: 'Sao10K: Llama 3.1 Euryale 70B v2.2' },
+                { id: 'sao10k/l3.1-70b-hanami-x1', name: 'Sao10K: Llama 3.1 70B Hanami x1' },
+                { id: 'sao10k/l3-lunaris-8b', name: 'Sao10K: Llama 3 8B Lunaris' },
+                { id: 'sao10k/l3-euryale-70b', name: 'Sao10k: Llama 3 Euryale 70B v2.1' },
+                { id: 'relace/relace-search', name: 'Relace: Relace Search' },
+                { id: 'relace/relace-apply-3', name: 'Relace: Relace Apply 3' },
+                { id: 'qwen/qwq-32b', name: 'Qwen: QwQ 32B' },
+                { id: 'qwen/qwen3-next-80b-a3b-thinking', name: 'Qwen: Qwen3 Next 80B A3B Thinking' },
+                { id: 'qwen/qwen3-next-80b-a3b-instruct', name: 'Qwen: Qwen3 Next 80B A3B Instruct' },
+                { id: 'qwen/qwen3-max', name: 'Qwen: Qwen3 Max' },
+                { id: 'qwen/qwen3-coder-plus', name: 'Qwen: Qwen3 Coder Plus' },
+                { id: 'qwen/qwen3-coder-flash', name: 'Qwen: Qwen3 Coder Flash' },
+                { id: 'qwen/qwen3-coder-30b-a3b-instruct', name: 'Qwen: Qwen3 Coder 30B A3B Instruct' },
+                { id: 'qwen/qwen3-coder', name: 'Qwen: Qwen3 Coder 480B A35B' },
+                { id: 'qwen/qwen3-8b', name: 'Qwen: Qwen3 8B' },
+                { id: 'qwen/qwen3-32b', name: 'Qwen: Qwen3 32B' },
+                { id: 'qwen/qwen3-30b-a3b-thinking-2507', name: 'Qwen: Qwen3 30B A3B Thinking 2507' },
+                { id: 'qwen/qwen3-30b-a3b-instruct-2507', name: 'Qwen: Qwen3 30B A3B Instruct 2507' },
+                { id: 'qwen/qwen3-30b-a3b', name: 'Qwen: Qwen3 30B A3B' },
+                { id: 'qwen/qwen3-235b-a22b-thinking-2507', name: 'Qwen: Qwen3 235B A22B Thinking 2507' },
+                { id: 'qwen/qwen3-235b-a22b-2507', name: 'Qwen: Qwen3 235B A22B Instruct 2507' },
+                { id: 'qwen/qwen3-235b-a22b', name: 'Qwen: Qwen3 235B A22B' },
+                { id: 'qwen/qwen3-14b', name: 'Qwen: Qwen3 14B' },
+                { id: 'qwen/qwen-turbo', name: 'Qwen: Qwen-Turbo' },
+                { id: 'qwen/qwen-plus-2025-07-28:thinking', name: 'Qwen: Qwen Plus 0728 (thinking)' },
+                { id: 'qwen/qwen-plus-2025-07-28', name: 'Qwen: Qwen Plus 0728' },
+                { id: 'qwen/qwen-plus', name: 'Qwen: Qwen-Plus' },
+                { id: 'qwen/qwen-max', name: 'Qwen: Qwen-Max ' },
+                { id: 'qwen/qwen-2.5-coder-32b-instruct', name: 'Qwen2.5 Coder 32B Instruct' },
+                { id: 'qwen/qwen-2.5-7b-instruct', name: 'Qwen: Qwen2.5 7B Instruct' },
+                { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen2.5 72B Instruct' },
+                { id: 'prime-intellect/intellect-3', name: 'Prime Intellect: INTELLECT-3' },
+                { id: 'perplexity/sonar-deep-research', name: 'Perplexity: Sonar Deep Research' },
+                { id: 'openai/gpt-oss-safeguard-20b', name: 'OpenAI: gpt-oss-safeguard-20b' },
+                { id: 'openai/gpt-oss-20b', name: 'OpenAI: gpt-oss-20b' },
+                { id: 'openai/gpt-oss-120b', name: 'OpenAI: gpt-oss-120b' },
+                { id: 'openai/gpt-4-1106-preview', name: 'OpenAI: GPT-4 Turbo (older v1106)' },
+                { id: 'openai/gpt-4-0314', name: 'OpenAI: GPT-4 (older v0314)' },
+                { id: 'openai/gpt-4', name: 'OpenAI: GPT-4' },
+                { id: 'openai/gpt-3.5-turbo-instruct', name: 'OpenAI: GPT-3.5 Turbo Instruct' },
+                { id: 'openai/gpt-3.5-turbo-16k', name: 'OpenAI: GPT-3.5 Turbo 16k' },
+                { id: 'openai/gpt-3.5-turbo-0613', name: 'OpenAI: GPT-3.5 Turbo (older v0613)' },
+                { id: 'openai/gpt-3.5-turbo', name: 'OpenAI: GPT-3.5 Turbo' },
+                { id: 'nvidia/nemotron-nano-9b-v2', name: 'NVIDIA: Nemotron Nano 9B V2' },
+                { id: 'nvidia/nemotron-3-nano-30b-a3b', name: 'NVIDIA: Nemotron 3 Nano 30B A3B' },
+                { id: 'nvidia/llama-3.3-nemotron-super-49b-v1.5', name: 'NVIDIA: Llama 3.3 Nemotron Super 49B V1.5' },
+                { id: 'nvidia/llama-3.1-nemotron-70b-instruct', name: 'NVIDIA: Llama 3.1 Nemotron 70B Instruct' },
+                { id: 'nousresearch/hermes-4-70b', name: 'Nous: Hermes 4 70B' },
+                { id: 'nousresearch/hermes-4-405b', name: 'Nous: Hermes 4 405B' },
+                { id: 'nousresearch/hermes-3-llama-3.1-70b', name: 'Nous: Hermes 3 70B Instruct' },
+                { id: 'nousresearch/hermes-3-llama-3.1-405b', name: 'Nous: Hermes 3 405B Instruct' },
+                { id: 'nousresearch/hermes-2-pro-llama-3-8b', name: 'NousResearch: Hermes 2 Pro - Llama-3 8B' },
+                { id: 'nex-agi/deepseek-v3.1-nex-n1', name: 'Nex AGI: DeepSeek V3.1 Nex N1' },
+                { id: 'morph/morph-v3-large', name: 'Morph: Morph V3 Large' },
+                { id: 'morph/morph-v3-fast', name: 'Morph: Morph V3 Fast' },
+                { id: 'moonshotai/kimi-k2-thinking', name: 'MoonshotAI: Kimi K2 Thinking' },
+                { id: 'moonshotai/kimi-k2-0905', name: 'MoonshotAI: Kimi K2 0905' },
+                { id: 'moonshotai/kimi-k2', name: 'MoonshotAI: Kimi K2 0711' },
+                { id: 'mistralai/mixtral-8x7b-instruct', name: 'Mistral: Mixtral 8x7B Instruct' },
+                { id: 'mistralai/mixtral-8x22b-instruct', name: 'Mistral: Mixtral 8x22B Instruct' },
+                { id: 'mistralai/mistral-small-creative', name: 'Mistral: Mistral Small Creative' },
+                { id: 'mistralai/mistral-small-24b-instruct-2501', name: 'Mistral: Mistral Small 3' },
+                { id: 'mistralai/mistral-saba', name: 'Mistral: Saba' },
+                { id: 'mistralai/mistral-nemo', name: 'Mistral: Mistral Nemo' },
+                { id: 'mistralai/mistral-large-2411', name: 'Mistral Large 2411' },
+                { id: 'mistralai/mistral-large-2407', name: 'Mistral Large 2407' },
+                { id: 'mistralai/mistral-large', name: 'Mistral Large' },
+                { id: 'mistralai/mistral-7b-instruct-v0.1', name: 'Mistral: Mistral 7B Instruct v0.1' },
+                { id: 'mistralai/devstral-small', name: 'Mistral: Devstral Small 1.1' },
+                { id: 'mistralai/devstral-medium', name: 'Mistral: Devstral Medium' },
+                { id: 'mistralai/devstral-2512', name: 'Mistral: Devstral 2 2512' },
+                { id: 'mistralai/codestral-2508', name: 'Mistral: Codestral 2508' },
+                { id: 'minimax/minimax-m2-her', name: 'MiniMax: MiniMax M2-her' },
+                { id: 'minimax/minimax-m2', name: 'MiniMax: MiniMax M2' },
+                { id: 'minimax/minimax-m1', name: 'MiniMax: MiniMax M1' },
+                { id: 'microsoft/wizardlm-2-8x22b', name: 'WizardLM-2 8x22B' },
+                { id: 'microsoft/phi-4', name: 'Microsoft: Phi 4' },
+                { id: 'meta-llama/llama-guard-3-8b', name: 'Llama Guard 3 8B' },
+                { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Meta: Llama 3.3 70B Instruct' },
+                { id: 'meta-llama/llama-3.2-3b-instruct', name: 'Meta: Llama 3.2 3B Instruct' },
+                { id: 'meta-llama/llama-3.2-1b-instruct', name: 'Meta: Llama 3.2 1B Instruct' },
+                { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Meta: Llama 3.1 8B Instruct' },
+                { id: 'meta-llama/llama-3.1-70b-instruct', name: 'Meta: Llama 3.1 70B Instruct' },
+                { id: 'meta-llama/llama-3-8b-instruct', name: 'Meta: Llama 3 8B Instruct' },
+                { id: 'meta-llama/llama-3-70b-instruct', name: 'Meta: Llama 3 70B Instruct' },
+                { id: 'mancer/weaver', name: 'Mancer: Weaver (alpha)' },
+                { id: 'inflection/inflection-3-productivity', name: 'Inflection: Inflection 3 Productivity' },
+                { id: 'inflection/inflection-3-pi', name: 'Inflection: Inflection 3 Pi' },
+                { id: 'ibm-granite/granite-4.0-h-micro', name: 'IBM: Granite 4.0 Micro' },
+                { id: 'gryphe/mythomax-l2-13b', name: 'MythoMax 13B' },
+                { id: 'google/gemma-3n-e4b-it', name: 'Google: Gemma 3n 4B' },
+                { id: 'google/gemma-2-27b-it', name: 'Google: Gemma 2 27B' },
+                { id: 'essentialai/rnj-1-instruct', name: 'EssentialAI: Rnj 1 Instruct' },
+                { id: 'deepseek/deepseek-v3.2-speciale', name: 'DeepSeek: DeepSeek V3.2 Speciale' },
+                { id: 'deepseek/deepseek-v3.2-exp', name: 'DeepSeek: DeepSeek V3.2 Exp' },
+                { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek: DeepSeek V3.2' },
+                { id: 'deepseek/deepseek-v3.1-terminus', name: 'DeepSeek: DeepSeek V3.1 Terminus' },
+                { id: 'deepseek/deepseek-r1-distill-qwen-32b', name: 'DeepSeek: R1 Distill Qwen 32B' },
+                { id: 'deepseek/deepseek-r1-distill-llama-70b', name: 'DeepSeek: R1 Distill Llama 70B' },
+                { id: 'deepseek/deepseek-r1-0528', name: 'DeepSeek: R1 0528' },
+                { id: 'deepseek/deepseek-r1', name: 'DeepSeek: R1' },
+                { id: 'deepseek/deepseek-chat-v3.1', name: 'DeepSeek: DeepSeek V3.1' },
+                { id: 'deepseek/deepseek-chat-v3-0324', name: 'DeepSeek: DeepSeek V3 0324' },
+                { id: 'deepseek/deepseek-chat', name: 'DeepSeek: DeepSeek V3' },
+                { id: 'deepcogito/cogito-v2.1-671b', name: 'Deep Cogito: Cogito v2.1 671B' },
+                { id: 'cohere/command-r7b-12-2024', name: 'Cohere: Command R7B (12-2024)' },
+                { id: 'cohere/command-r-plus-08-2024', name: 'Cohere: Command R+ (08-2024)' },
+                { id: 'cohere/command-r-08-2024', name: 'Cohere: Command R (08-2024)' },
+                { id: 'cohere/command-a', name: 'Cohere: Command A' },
+                { id: 'baidu/ernie-4.5-300b-a47b', name: 'Baidu: ERNIE 4.5 300B A47B ' },
+                { id: 'baidu/ernie-4.5-21b-a3b-thinking', name: 'Baidu: ERNIE 4.5 21B A3B Thinking' },
+                { id: 'baidu/ernie-4.5-21b-a3b', name: 'Baidu: ERNIE 4.5 21B A3B' },
+                { id: 'arcee-ai/virtuoso-large', name: 'Arcee AI: Virtuoso Large' },
+                { id: 'arcee-ai/trinity-mini', name: 'Arcee AI: Trinity Mini' },
+                { id: 'arcee-ai/maestro-reasoning', name: 'Arcee AI: Maestro Reasoning' },
+                { id: 'arcee-ai/coder-large', name: 'Arcee AI: Coder Large' },
+                { id: 'anthracite-org/magnum-v4-72b', name: 'Magnum v4 72B' },
+                { id: 'amazon/nova-micro-v1', name: 'Amazon: Nova Micro 1.0' },
+                { id: 'alpindale/goliath-120b', name: 'Goliath 120B' },
+                { id: 'allenai/olmo-3.1-32b-instruct', name: 'AllenAI: Olmo 3.1 32B Instruct' },
+                { id: 'allenai/olmo-3-32b-think', name: 'AllenAI: Olmo 3 32B Think' },
+                { id: 'alibaba/tongyi-deepresearch-30b-a3b', name: 'Tongyi DeepResearch 30B A3B' },
+                { id: 'alfredpros/codellama-7b-instruct-solidity', name: 'AlfredPros: CodeLLaMa 7B Instruct Solidity' },
+                { id: 'aion-labs/aion-rp-llama-3.1-8b', name: 'AionLabs: Aion-RP 1.0 (8B)' },
+                { id: 'aion-labs/aion-1.0-mini', name: 'AionLabs: Aion-1.0-Mini' },
+                { id: 'aion-labs/aion-1.0', name: 'AionLabs: Aion-1.0' },
+                { id: 'ai21/jamba-large-1.7', name: 'AI21: Jamba Large 1.7' },
+            ]
+        };
+
+        let chatHistory = JSON.parse(localStorage.getItem('elka_chat_history') || '[]');
+
+        window.onload = () => {
+            initModelSelector();
+            renderChat();
+            if (chatHistory.length === 0) {
+                addMessage('assistant', 'Привет! Я твой AI-ассистент. Оптимизирован под мобильные устройства. О чем хочешь поговорить?', false);
+            }
+            updateThemeIcon();
+        };
+
+        function initModelSelector() {
+            const select = document.getElementById('model-select');
+            select.innerHTML = CONFIG.CHAT_MODELS.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.getElementById('theme-icon').innerHTML = `<i class="fa-solid fa-${isDark ? 'moon' : 'sun'}"></i>`;
+        }
+
+        // --- CHAT LOGIC ---
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            const model = document.getElementById('model-select').value;
+            
+            if (!text) return;
+
+            addMessage('user', text);
+            input.value = '';
+            document.getElementById('chat-loader').style.display = 'block';
+
+            try {
+                const response = await fetch(`${CONFIG.BASE_URL}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: chatHistory.map(m => ({ role: m.role, content: m.text })).concat([{ role: 'user', content: text }])
+                    })
+                });
+
+                if (!response.ok) throw new Error('API Error');
+
+                const data = await response.json();
+                const reply = data.choices[0].message.content;
+                addMessage('assistant', reply);
+            } catch (err) {
+                addMessage('assistant', 'Произошла ошибка. Проверь соединение или API ключ.');
+            } finally {
+                document.getElementById('chat-loader').style.display = 'none';
+            }
+        }
+
+        function addMessage(role, text, save = true) {
+            if (save) {
+                chatHistory.push({ role, text });
+                localStorage.setItem('elka_chat_history', JSON.stringify(chatHistory));
+            }
+            renderChat();
+        }
+
+        function renderChat() {
+            const scroller = document.getElementById('chat-scroller');
+            scroller.innerHTML = '';
+            chatHistory.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `msg-bubble ${msg.role === 'user' ? 'msg-user' : 'msg-ai'}`;
+                div.innerText = msg.text;
+                scroller.appendChild(div);
+            });
+            scroller.scrollTop = scroller.scrollHeight;
+        }
+
+        function clearHistory() {
+            if (confirm('Очистить историю?')) {
+                chatHistory = [];
+                localStorage.removeItem('elka_chat_history');
+                renderChat();
+            }
+        }
+
+        document.getElementById('chat-input').addEventListener('keypress', e => { 
+            if(e.key === 'Enter') sendMessage(); 
+        });
+    </script>
+</body>
+</html>
